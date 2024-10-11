@@ -24,7 +24,11 @@ export default function Page() {
       {!hasContracts ? (
         <GetStartedWithContractsDeploy />
       ) : (
-        <DeployedContracts contractListQuery={deployedContracts} limit={50} />
+        <DeployedContracts
+          contractList={deployedContracts.data}
+          isPending={deployedContracts.isPending}
+          limit={50}
+        />
       )}
     </div>
   );

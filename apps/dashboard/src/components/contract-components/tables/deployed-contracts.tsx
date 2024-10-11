@@ -42,6 +42,7 @@ import {
   usePagination,
   useTable,
 } from "react-table";
+import { SkeletonContainer } from "../../../@/components/ui/skeleton";
 import { useAllChainsData } from "../../../hooks/chains/allChains";
 import { useChainSlug } from "../../../hooks/chains/chainSlug";
 import { ImportModal } from "../import-contract/modal";
@@ -50,25 +51,27 @@ import { ShowMoreButton } from "./show-more-button";
 
 interface DeployedContractsProps {
   noHeader?: boolean;
-  contractListQuery: ReturnType<typeof useAllContractList>;
+  contractList: ReturnType<typeof useAllContractList>["data"];
+  isPending: boolean;
   limit?: number;
 }
 
 export const DeployedContracts: React.FC<DeployedContractsProps> = ({
   noHeader,
-  contractListQuery,
+  contractList,
   limit = 10,
+  isPending,
 }) => {
   const [importModalOpen, setImportModalOpen] = useState(false);
 
   const chainIdsWithDeployments = useMemo(() => {
     const set = new Set<number>();
     // biome-ignore lint/complexity/noForEach: FIXME
-    contractListQuery.data.forEach((contract) => {
+    contractList.forEach((contract) => {
       set.add(contract.chainId);
     });
     return [...set];
-  }, [contractListQuery.data]);
+  }, [contractList]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -111,13 +114,13 @@ export const DeployedContracts: React.FC<DeployedContractsProps> = ({
       )}
 
       <ContractTable
-        combinedList={contractListQuery.data}
+        combinedList={contractList}
         limit={limit}
         chainIdsWithDeployments={chainIdsWithDeployments}
-        loading={contractListQuery.isPending}
+        loading={isPending}
       />
 
-      {contractListQuery.data.length === 0 && contractListQuery.isFetched && (
+      {contractList.length === 0 && !isPending && (
         <div className="flex h-[100px] items-center justify-center text-muted-foreground">
           No contracts found
         </div>
@@ -136,13 +139,21 @@ const RemoveFromDashboardButton: React.FC<RemoveFromDashboardButtonProps> = ({
   contractAddress,
 }) => {
   const mutation = useRemoveContractMutation();
+  const router = useDashboardRouter();
 
   return (
     <Button
       variant="ghost"
       onClick={(e) => {
         e.stopPropagation();
-        mutation.mutate({ chainId, contractAddress });
+        mutation.mutateAsync(
+          { chainId, contractAddress },
+          {
+            onSuccess: () => {
+              router.refresh();
+            },
+          },
+        );
       }}
       disabled={mutation.isPending}
       className="!bg-background hover:!bg-accent gap-2"
@@ -236,9 +247,14 @@ const ContractTable: React.FC<ContractTableProps> = ({
           return (
             <div className="flex items-center gap-2">
               <ChainIcon size={24} ipfsSrc={data?.icon?.url} />
-              <p className="text-muted-foreground text-sm">
-                {cleanedChainName}
-              </p>
+              <SkeletonContainer
+                loadedData={data ? cleanedChainName : undefined}
+                skeletonData={`Chain ID ${cell.row.original.chainId}`}
+                render={(v) => {
+                  return <p className="text-muted-foreground text-sm">{v}</p>;
+                }}
+              />
+
               {data?.testnet && (
                 <Badge variant="outline" className="text-muted-foreground">
                   Testnet
