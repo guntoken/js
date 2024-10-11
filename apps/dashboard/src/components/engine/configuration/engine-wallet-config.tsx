@@ -1,5 +1,6 @@
 import { TabButtons } from "@/components/ui/tabs";
 import { ToolTipLabel } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import {
   type EngineInstance,
   useEngineWalletConfig,
@@ -66,7 +67,7 @@ export const EngineWalletConfig: React.FC<EngineWalletConfigProps> = ({
             (key === "gcp-kms" && !isGcpKmsConfigured)
               ? ({ className }) => (
                   <ToolTipLabel label="Not configured">
-                    <CircleAlertIcon className={className} />
+                    <CircleAlertIcon className={cn(className, "size-4")} />
                   </ToolTipLabel>
                 )
               : undefined,

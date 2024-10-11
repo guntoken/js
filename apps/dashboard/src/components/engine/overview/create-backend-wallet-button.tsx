@@ -46,7 +46,7 @@ interface CreateBackendWalletButtonProps {
 export const CreateBackendWalletButton: React.FC<
   CreateBackendWalletButtonProps
 > = ({ instance, walletConfig }) => {
-  const supportsMultipleWalletTypes = useHasEngineFeature(
+  const { isSupported: supportsMultipleWalletTypes } = useHasEngineFeature(
     instance.url,
     "HETEROGENEOUS_WALLET_TYPES",
   );
@@ -125,39 +125,6 @@ export const CreateBackendWalletButton: React.FC<
 
                 <div className="flex flex-col gap-5">
                   {/* Wallet type */}
-                  {/* <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Wallet Type</FormLabel>
-                        <FormControl>
-                          <Select
-                            onValueChange={(value) => field.onChange(value)}
-                            value={field.value}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent className="z-[10001]">
-                              <SelectGroup>
-                                {walletTypeOptions.map((option) => (
-                                  <SelectItem
-                                    key={option.key}
-                                    value={option.key}
-                                  >
-                                    {option.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectGroup>
-                            </SelectContent>
-                          </Select>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />*/}
-
                   <FormFieldSetup
                     label="Wallet Type"
                     errorMessage={
@@ -168,9 +135,10 @@ export const CreateBackendWalletButton: React.FC<
                     tooltip={null}
                   >
                     <Select
-                      onValueChange={(value) =>
-                        form.setValue("type", value as EngineBackendWalletType)
-                      }
+                      onValueChange={(value) => {
+                        form.reset();
+                        form.setValue("type", value as EngineBackendWalletType);
+                      }}
                       value={form.watch("type")}
                     >
                       <SelectTrigger>
@@ -190,6 +158,7 @@ export const CreateBackendWalletButton: React.FC<
 
                   {(walletType === "aws-kms" && !isAwsKmsConfigured) ||
                   (walletType === "gcp-kms" && !isGcpKmsConfigured) ? (
+                    // Warning if not configured
                     <Alert variant="warning">
                       <CircleAlertIcon className="size-5" />
                       <AlertTitle>
@@ -208,7 +177,9 @@ export const CreateBackendWalletButton: React.FC<
                       </AlertDescription>
                     </Alert>
                   ) : (
+                    // Label
                     <FormFieldSetup
+                      key="label"
                       label="Label"
                       errorMessage={
                         form.getFieldState("label", form.formState).error

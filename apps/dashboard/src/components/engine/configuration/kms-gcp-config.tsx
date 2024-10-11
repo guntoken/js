@@ -1,4 +1,5 @@
 import { FormFieldSetup } from "@/components/blocks/FormFieldSetup";
+import { Spinner } from "@/components/ui/Spinner/Spinner";
 import { Button } from "@/components/ui/button";
 import { Form, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -20,9 +21,11 @@ interface KmsGcpConfigProps {
 }
 
 export const KmsGcpConfig: React.FC<KmsGcpConfigProps> = ({ instance }) => {
-  const { mutate: setGcpKmsConfig } = useEngineSetWalletConfig(instance.url);
+  const { mutate: setGcpKmsConfig, isPending } = useEngineSetWalletConfig(
+    instance.url,
+  );
   const { data: gcpConfig } = useEngineWalletConfig(instance.url);
-  const supportsMultipleWalletTypes = useHasEngineFeature(
+  const { isSupported: supportsMultipleWalletTypes } = useHasEngineFeature(
     instance.url,
     "HETEROGENEOUS_WALLET_TYPES",
   );
@@ -210,8 +213,9 @@ export const KmsGcpConfig: React.FC<KmsGcpConfigProps> = ({ instance }) => {
               This will clear other credentials.
             </p>
           )}
-          <Button disabled={!form.formState.isDirty} type="submit">
-            {form.formState.isSubmitting ? "Saving..." : "Save"}
+          <Button type="submit" className="min-w-28 gap-2" disabled={isPending}>
+            {isPending && <Spinner className="size-4" />}
+            Save
           </Button>
         </div>
       </form>

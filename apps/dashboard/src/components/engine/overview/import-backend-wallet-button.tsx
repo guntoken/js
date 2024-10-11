@@ -47,7 +47,7 @@ interface ImportBackendWalletButtonProps {
 export const ImportBackendWalletButton: React.FC<
   ImportBackendWalletButtonProps
 > = ({ instance, walletConfig }) => {
-  const supportsMultipleWalletTypes = useHasEngineFeature(
+  const { isSupported: supportsMultipleWalletTypes } = useHasEngineFeature(
     instance.url,
     "HETEROGENEOUS_WALLET_TYPES",
   );
@@ -66,16 +66,16 @@ export const ImportBackendWalletButton: React.FC<
 
   const onSubmit = (raw: ImportBackendWalletInput) => {
     // Submit only relevant fields.
-    let data: ImportBackendWalletInput = {};
+    const data: ImportBackendWalletInput = {
+      label: raw.label,
+    };
     if (walletType === "local") {
-      data = { privateKey: raw.privateKey };
+      data.privateKey = raw.privateKey;
     } else if (walletType === "aws-kms") {
-      data = { awsKmsArn: raw.awsKmsArn };
+      data.awsKmsArn = raw.awsKmsArn;
     } else if (walletType === "gcp-kms") {
-      data = {
-        gcpKmsKeyId: raw.gcpKmsKeyId,
-        gcpKmsKeyVersionId: raw.gcpKmsKeyVersionId,
-      };
+      data.gcpKmsKeyId = raw.gcpKmsKeyId;
+      data.gcpKmsKeyVersionId = raw.gcpKmsKeyVersionId;
     }
 
     importBackendWallet(data, {
@@ -153,9 +153,10 @@ export const ImportBackendWalletButton: React.FC<
                     <FormLabel>Wallet Type</FormLabel>
                     <FormControl>
                       <Select
-                        onValueChange={(value) =>
-                          setWalletType(value as EngineBackendWalletType)
-                        }
+                        onValueChange={(value) => {
+                          form.reset();
+                          setWalletType(value as EngineBackendWalletType);
+                        }}
                         value={walletType}
                       >
                         <SelectTrigger>
@@ -198,6 +199,7 @@ export const ImportBackendWalletButton: React.FC<
                     <>
                       {/* Label */}
                       <FormFieldSetup
+                        key="label"
                         label="Label"
                         errorMessage={
                           form.getFieldState("label", form.formState).error
@@ -241,17 +243,17 @@ export const ImportBackendWalletButton: React.FC<
                         </FormFieldSetup>
                       ) : walletType === "aws-kms" ? (
                         <FormFieldSetup
-                          isRequired
+                          key="awsKmsArn"
                           label="AWS KMS ARN"
                           errorMessage={
                             form.getFieldState("awsKmsArn", form.formState)
                               .error?.message
                           }
                           htmlFor="awsKmsArn"
+                          isRequired
                           tooltip={null}
                         >
                           <Input
-                            key="awsKmsArn"
                             id="awsKmsArn"
                             placeholder="arn:aws:kms:us-west-2:123456789012:key/2b7d8e0c-..."
                             autoComplete="off"
@@ -262,6 +264,7 @@ export const ImportBackendWalletButton: React.FC<
                       ) : walletType === "gcp-kms" ? (
                         <>
                           <FormFieldSetup
+                            key="gcpKmsKeyId"
                             htmlFor="gcpKmsKeyId"
                             errorMessage={
                               form.getFieldState("gcpKmsKeyId", form.formState)
@@ -272,7 +275,6 @@ export const ImportBackendWalletButton: React.FC<
                             tooltip={null}
                           >
                             <Input
-                              key="gcpKmsKeyId"
                               id="gcpKmsKeyId"
                               placeholder="projects/my-project/locations/us-central1/keyRings/my-key-ring/cryptoKeys/my-key"
                               autoComplete="off"
@@ -284,6 +286,7 @@ export const ImportBackendWalletButton: React.FC<
                           </FormFieldSetup>
 
                           <FormFieldSetup
+                            key="gcpKmsKeyVersionId"
                             label="GCP KMS Version ID"
                             errorMessage={
                               form.getFieldState(
@@ -296,7 +299,6 @@ export const ImportBackendWalletButton: React.FC<
                             tooltip={null}
                           >
                             <Input
-                              key="gcpKmsKeyVersionId"
                               id="gcpKmsKeyVersionId"
                               placeholder="1"
                               autoComplete="off"

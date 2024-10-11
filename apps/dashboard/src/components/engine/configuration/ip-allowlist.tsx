@@ -30,7 +30,7 @@ export const EngineIpAllowlistConfig: React.FC<
     "IP Allowlist updated successfully.",
     "Failed to update IP Allowlist",
   );
-  const isSupported = useHasEngineFeature(instanceUrl, "IP_ALLOWLIST");
+  const { isSupported } = useHasEngineFeature(instanceUrl, "IP_ALLOWLIST");
 
   const form = useForm<IpForm>({
     values: { raw: existingIpAllowlist?.join("\n") ?? "" },

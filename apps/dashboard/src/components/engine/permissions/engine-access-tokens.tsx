@@ -24,7 +24,7 @@ export const EngineAccessTokens: React.FC<EngineAccessTokensProps> = ({
   instanceUrl,
 }) => {
   const [selected, setSelected] = useState<AccessTokenType>("standard");
-  const hasFeatureKeypairAuthentication = useHasEngineFeature(
+  const { isSupported: supportsKeyPairAuth } = useHasEngineFeature(
     instanceUrl,
     "KEYPAIR_AUTH",
   );
@@ -35,7 +35,7 @@ export const EngineAccessTokens: React.FC<EngineAccessTokensProps> = ({
         <Heading size="title.md">Access Tokens</Heading>
       </Flex>
 
-      {hasFeatureKeypairAuthentication && (
+      {supportsKeyPairAuth && (
         <ButtonGroup size="sm" variant="ghost" spacing={2}>
           <Button
             type="button"

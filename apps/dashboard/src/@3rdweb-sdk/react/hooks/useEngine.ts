@@ -150,8 +150,11 @@ export function useHasEngineFeature(
   instanceUrl: string,
   feature: EngineFeature,
 ) {
-  const { data } = useEngineSystemHealth(instanceUrl);
-  return !!data?.features?.includes(feature);
+  const query = useEngineSystemHealth(instanceUrl);
+  return {
+    query,
+    isSupported: !!query.data?.features?.includes(feature),
+  };
 }
 
 interface EngineSystemQueueMetrics {
